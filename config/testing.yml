@@ -259,7 +259,7 @@ haploid_stratifications:
                 hap:
                   lines:
                     - {chr: 2, start: 10, end: 50}
-                    - {chr: 21, start: 10, end: 50}
+                    - {chr: 21, start: 10, end: 40000000}
                   # The must be a complete sentence and will show up in the
                   # README
                   provenance: I come in piece.
