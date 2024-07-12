@@ -2902,7 +2902,7 @@ class Tools(BaseModel):
     """Urls for tools to download/build/use in the pipeline."""
 
     kent: HttpUrl = "https://github.com/ucscGenomeBrowser/kent/archive/refs/tags/v462_base.tar.gz"  # type: ignore
-    repseq: HttpUrl = "https://github.com/ndwarshuis/repseq/archive/refs/tags/v1.1.0.tar.gz"  # type: ignore
+    repseq: HttpUrl = "https://github.com/usnistgov/giab-repseq/archive/refs/tags/v1.1.0.tar.gz"  # type: ignore
     paftools: HttpUrl = "https://raw.githubusercontent.com/lh3/minimap2/e28a55be86b298708a2a67c924d665a00b8d829c/misc/paftools.js"  # type: ignore
     dipcall_aux: HttpUrl = "https://raw.githubusercontent.com/lh3/dipcall/6bd5d7724699491f215aeb5fb628490ebf2cc3ae/dipcall-aux.js"  # type: ignore
     gemlib: HttpUrl = "https://sourceforge.net/projects/gemlibrary/files/gem-library/Binary%20pre-release%203/GEM-binaries-Linux-x86_64-core_i3-20130406-045632.tbz2/download"  # type: ignore
@@ -3794,9 +3794,9 @@ AnyStrat = HapStrat | Dip1Strat | Dip2Strat
 
 
 class Documentation(BaseModel):
-    pipeline_repo: HttpUrl = "https://github.com/ndwarshuis/giab-strats-smk"  # type: ignore
+    pipeline_repo: HttpUrl = "https://github.com/usnistgov/giab-stratifications-pipeline"  # type: ignore
     config_repo: HttpUrl = (
-        "https://github.com/ndwarshuis/giab-stratifications"  # type: ignore
+        "https://github.com/usnistgov/giab-stratifications"  # type: ignore
     )
 
 
