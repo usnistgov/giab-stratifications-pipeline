@@ -86,6 +86,7 @@ def main(smk: Any, sconf: cfg.GiabStrats) -> None:
     txt = tu.load_template_path(readme).render(
         refname=rfk,
         haplotypes=[h.name for h in sconf.refkey_haplotypes(rfk)],
+        have_diploid=bd.want_diploid,
         have_low_complexity=bd.want_low_complexity,
         have_segdups=have_final_outputs("segdups", cfg.SegdupPaths),
         have_sex=have_final_outputs("xy", cfg.SexPaths),

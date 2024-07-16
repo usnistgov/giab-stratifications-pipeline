@@ -3649,6 +3649,10 @@ class BuildData_(Generic[RefSrcT, BedSrcT, VcfSrcT, BedCoordsT, BuildCompareT]):
         return self.build.bigbed
 
     @property
+    def want_diploid(self) -> bool:
+        return len(self.build.include.hets) > 0
+
+    @property
     def want_low_complexity(self) -> bool:
         return self.build.include.low_complexity
 
