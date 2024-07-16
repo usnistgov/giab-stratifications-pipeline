@@ -228,7 +228,7 @@ rule make_coverage_plots:
         "../envs/rmarkdown.yml"
     params:
         core_levels=[c.value for c in CoreLevel],
-        other_levels=config.other_levels,
+        other_levels=[l.key for l in config.other_levels],
     script:
         "../scripts/rmarkdown/rmarkdown/coverage_plots.Rmd"
 
@@ -243,7 +243,7 @@ rule make_window_coverage_plots:
         "../envs/rmarkdown.yml"
     params:
         core_levels=[c.value for c in CoreLevel],
-        other_levels=config.other_levels,
+        other_levels=[l.key for l in config.other_levels],
     script:
         "../scripts/rmarkdown/rmarkdown/window_coverage_plots.Rmd"
 
