@@ -1,3 +1,9 @@
+# 6.0.1
+
+- move repositories to new location (update docs and submodules)
+- fix typos in readme
+- fix bugs in validation reports
+
 # 6.0.0
 
 This update primarily adds documentation and fixes some long-standing bugs
