@@ -90,14 +90,14 @@ rule filter_long_superdups:
 
 use rule _invert_autosomal_regions as notin_superdups with:
     input:
-        rules.merge_superdups.output,
+        **invert_region_inputs(rules.merge_superdups.output),
     output:
         segdup.final("notinsegdups"),
 
 
 use rule notin_superdups as notin_long_superdups with:
     input:
-        rules.filter_long_superdups.output,
+        **invert_region_inputs(rules.filter_long_superdups.output),
     output:
         segdup.final("notinsegdups_gt10kb"),
 

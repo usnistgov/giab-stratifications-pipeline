@@ -212,7 +212,9 @@ rule subtract_uniform_repeat_complement:
 
 rule slop_uniform_repeats:
     input:
-        lambda w: lookup_perfect_uniform_repeat(w.unit_name, int(w.total_len)),
+        bed=lambda w: lookup_perfect_uniform_repeat(w.unit_name, int(w.total_len)),
+        genome=rules.filter_sort_ref.output["genome"],
+        gapless=rules.get_gapless.output.auto,
     output:
         lc.final("SimpleRepeat_{unit_name}_ge{total_len}_slop5"),
     conda:
@@ -220,15 +222,12 @@ rule slop_uniform_repeats:
     wildcard_constraints:
         unit_name=unit_name_constraint,
         total_len="\d+",
-    params:
-        genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
     shell:
         """
-        slopBed -i {input} -b 5 -g {params.genome} | \
+        slopBed -i {input.bed} -b 5 -g {input.genome} | \
         cut -f1-3 | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {params.gapless} -sorted -g {params.genome} | \
+        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
         bgzip -c \
         > {output}
         """
@@ -237,13 +236,15 @@ rule slop_uniform_repeats:
 # +1 to lenB since the filename is [X, Y] and not [X, Y)
 use rule slop_uniform_repeats as slop_uniform_repeat_ranges with:
     input:
-        lambda w: expand(
+        bed=lambda w: expand(
             rules.subtract_uniform_repeats.output,
             allow_missing=True,
             unit_name=w.unit_name,
             total_lenA=int(w.total_lenA),
             total_lenB=int(w.total_lenB) + 1,
         ),
+        genome=rules.filter_sort_ref.output["genome"],
+        gapless=rules.get_gapless.output.auto,
     output:
         lc.final("SimpleRepeat_{unit_name}_{total_lenA}to{total_lenB}_slop5"),
     wildcard_constraints:
@@ -254,11 +255,13 @@ use rule slop_uniform_repeats as slop_uniform_repeat_ranges with:
 
 use rule slop_uniform_repeats as slop_uniform_repeats_complement with:
     input:
-        lambda w: lookup_perfect_uniform_repeat_complement(
+        bed=lambda w: lookup_perfect_uniform_repeat_complement(
             w.unit_name,
             int(w.total_len),
             w.bases,
         ),
+        genome=rules.filter_sort_ref.output["genome"],
+        gapless=rules.get_gapless.output.auto,
     output:
         lc.final("SimpleRepeat_{unit_name}_ge{total_len}_{bases}_slop5"),
     wildcard_constraints:
@@ -269,7 +272,7 @@ use rule slop_uniform_repeats as slop_uniform_repeats_complement with:
 
 use rule slop_uniform_repeats as slop_uniform_repeat_ranges_complement with:
     input:
-        lambda w: expand(
+        bed=lambda w: expand(
             rules.subtract_uniform_repeat_complement.output,
             allow_missing=True,
             unit_name=w.unit_name,
@@ -277,6 +280,8 @@ use rule slop_uniform_repeats as slop_uniform_repeat_ranges_complement with:
             total_lenB=int(w.total_lenB) + 1,
             bases=w.bases,
         ),
+        genome=rules.filter_sort_ref.output["genome"],
+        gapless=rules.get_gapless.output.auto,
     output:
         lc.final("SimpleRepeat_{unit_name}_{total_lenA}to{total_lenB}_{bases}_slop5"),
     wildcard_constraints:
@@ -306,37 +311,38 @@ rule merge_perfect_uniform_repeats:
 
 rule merge_imperfect_uniform_repeats:
     input:
-        expand(
+        bed=expand(
             rules.merge_perfect_uniform_repeats.output,
             allow_missing=True,
             base=["A", "C", "G", "T"],
         ),
+        genome=rules.filter_sort_ref.output["genome"],
+        gapless=rules.get_gapless.output.auto,
     output:
         lc.final("SimpleRepeat_imperfecthomopolge{merged_len}_slop5"),
     conda:
         "../envs/bedtools.yml"
     wildcard_constraints:
         merged_len="\d+",
-    params:
-        genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
     shell:
         """
-        multiIntersectBed -i {input} | \
-        slopBed -i stdin -b 5 -g {params.genome} | \
+        multiIntersectBed -i {input.bed} | \
+        slopBed -i stdin -b 5 -g {input.genome} | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {params.gapless} -sorted -g {params.genome} | \
+        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
 
 use rule merge_imperfect_uniform_repeats as merge_imperfect_uniform_repeats_complement with:
     input:
-        lambda w: expand(
+        bed=lambda w: expand(
             rules.merge_perfect_uniform_repeats.output,
             allow_missing=True,
             base=list(w.bases),
         ),
+        genome=rules.filter_sort_ref.output["genome"],
+        gapless=rules.get_gapless.output.auto,
     output:
         lc.final("SimpleRepeat_imperfecthomopolge{merged_len}_{bases}_slop5"),
     wildcard_constraints:
@@ -444,7 +450,6 @@ use rule download_gaps as download_simreps with:
 checkpoint normalize_simreps:
     input:
         lambda w: all_low_complexity_sources_wc(w).trf_sources,
-        # lambda w: bed_src_inputs(rules.download_simreps.output, si_to_simreps, w),
     output:
         lc.inter.filtersort.data / "simreps.json",
     params:
@@ -493,7 +498,6 @@ use rule download_gaps as download_rmsk with:
 checkpoint normalize_rmsk:
     input:
         lambda w: all_low_complexity_sources_wc(w).rmsk_sources,
-        # lambda w: bed_src_inputs(rules.download_rmsk.output, si_to_rmsk, w),
     output:
         lc.inter.filtersort.data / "rmsk.txt.gz",
     params:
@@ -558,7 +562,6 @@ use rule download_gaps as download_censat with:
 checkpoint normalize_censat:
     input:
         lambda w: all_low_complexity_sources_wc(w).sat_sources,
-        # lambda w: bed_src_inputs(rules.download_censat.output, si_to_satellites, w),
     output:
         lc.inter.filtersort.data / "censat.json",
     params:
@@ -616,7 +619,7 @@ rule merge_satellites:
 # TODO not DRY (we "invert" things all the time with this exact same rule)
 use rule _invert_autosomal_regions as invert_satellites with:
     input:
-        rules.merge_satellites.output,
+        **invert_region_inputs(rules.merge_satellites.output),
     output:
         lc.final("notinsatellites_slop5"),
 
@@ -649,7 +652,7 @@ rule merge_all_uniform_repeats:
 
 use rule invert_satellites as invert_all_uniform_repeats with:
     input:
-        rules.merge_all_uniform_repeats.output,
+        **invert_region_inputs(rules.merge_all_uniform_repeats.output),
     output:
         lc.final("notinAllHomopolymers_ge7bp_imperfectge11bp_slop5"),
 
@@ -745,7 +748,7 @@ rule merge_filtered_TRs:
 
 use rule invert_satellites as invert_TRs with:
     input:
-        rules.merge_filtered_TRs.output,
+        **invert_region_inputs(rules.merge_filtered_TRs.output),
     output:
         lc.final("notinallTandemRepeats"),
 
@@ -764,7 +767,7 @@ use rule merge_filtered_TRs as merge_HPs_and_TRs with:
 
 use rule invert_satellites as invert_HPs_and_TRs with:
     input:
-        rules.merge_HPs_and_TRs.output,
+        **invert_region_inputs(rules.merge_HPs_and_TRs.output),
     output:
         lc.final("notinAllTandemRepeatsandHomopolymers_slop5"),
 

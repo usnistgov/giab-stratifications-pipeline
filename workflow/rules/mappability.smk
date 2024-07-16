@@ -246,7 +246,7 @@ checkpoint merge_nonunique:
 
 use rule _invert_autosomal_regions as invert_merged_nonunique with:
     input:
-        rules.merge_nonunique.output.all_lowmap,
+        **invert_region_inputs(rules.merge_nonunique.output.all_lowmap),
     output:
         mlty.final("notinlowmappabilityall"),
 

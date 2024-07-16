@@ -192,7 +192,7 @@ rule merge_cds:
 
 use rule _invert_autosomal_regions as invert_cds with:
     input:
-        rules.merge_cds.output,
+        **invert_region_inputs(rules.merge_cds.output),
     output:
         func.final("notinrefseq_cds"),
 
