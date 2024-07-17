@@ -12,8 +12,8 @@ def filter_xy_feature(
 ) -> None:
     ws: dict[str, str] = smk.wildcards
     bed_input = cfg.smk_to_input_name(smk, "bed")
-    gapless_input = cfg.smk_to_input_name(smk, "gapless")
-    genome_input = cfg.smk_to_input_name(smk, "genome")
+    valid_path = cfg.smk_to_input_name(smk, "valid")
+    genome_path = cfg.smk_to_input_name(smk, "genome")
     bed_output = cfg.smk_to_output(smk)
     log = cfg.smk_to_log(smk)
 
@@ -41,6 +41,6 @@ def filter_xy_feature(
     df_filtered = df_sorted[level_mask].drop(columns=[bf.level_col])
     # TODO put this in its own rule to simplify script?
     with bed_to_stream(df_filtered) as s:
-        p, o = intersectBed(s, gapless_input, genome_input)
+        p, o = intersectBed(s, valid_path, genome_path)
         bgzip_file(o, bed_output)
         check_processes([p], log)

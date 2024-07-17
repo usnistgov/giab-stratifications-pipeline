@@ -219,7 +219,7 @@ def merge_nonunique_inputs(wildcards):
 checkpoint merge_nonunique:
     input:
         bed=merge_nonunique_inputs,
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
         genome=rules.filter_sort_ref.output["genome"],
     output:
         single_lowmap=mlty.inter.postsort.data / "single_lowmap.json",

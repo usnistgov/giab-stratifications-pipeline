@@ -307,7 +307,7 @@ rule merge_het_regions:
         bed=lambda w: if_dip1_else(
             False, True, "combine_dip1_hets", "merge_all_hets", w
         ),
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
         genome=rules.filter_sort_ref.output["genome"],
         xy_nonpar=rules.concat_xy_nonpar.output,
     output:
@@ -328,7 +328,7 @@ rule merge_het_regions:
         gunzip -c {input.bed} | \
         slopBed -i stdin -g {input.genome} -b {params.size} | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         subtractBed -a stdin -b {input.xy_nonpar} -sorted | \
         bgzip -c > {output}
         """
@@ -339,7 +339,7 @@ use rule merge_het_regions as merge_het_SNVorSV_regions with:
         bed=lambda w: if_dip1_else(
             False, True, "combine_SNVorSV_dip1_hets", "merge_SNVorSV_hets", w
         ),
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
         genome=rules.filter_sort_ref.output["genome"],
         xy_nonpar=rules.concat_xy_nonpar.output,
     output:
@@ -351,7 +351,7 @@ use rule merge_het_regions as merge_het_SNVorSV_regions with:
 rule invert_het_regions:
     input:
         bed=rules.merge_het_regions.output,
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
         genome=rules.filter_sort_ref.output["genome"],
         xy_nonpar=rules.concat_xy_nonpar.output,
     output:
@@ -363,7 +363,7 @@ rule invert_het_regions:
     shell:
         """
         complementBed -i {input.bed} -g {input.genome} | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         subtractBed -a stdin -b {input.xy_nonpar} -sorted | \
         bgzip -c > {output}
         """
@@ -372,7 +372,7 @@ rule invert_het_regions:
 use rule invert_het_regions as invert_het_SNVorSV_regions with:
     input:
         bed=rules.merge_het_SNVorSV_regions.output,
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
         genome=rules.filter_sort_ref.output["genome"],
         xy_nonpar=rules.concat_xy_nonpar.output,
     output:

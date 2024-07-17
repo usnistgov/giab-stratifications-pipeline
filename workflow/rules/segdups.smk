@@ -60,7 +60,7 @@ rule merge_superdups:
     input:
         bed=lambda w: read_checkpoint("normalize_superdups", w),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         segdup.final("segdups"),
     conda:
@@ -68,7 +68,7 @@ rule merge_superdups:
     shell:
         """
         mergeBed -i {input.bed} -d 100 | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 

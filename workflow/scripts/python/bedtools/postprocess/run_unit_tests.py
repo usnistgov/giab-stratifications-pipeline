@@ -11,7 +11,7 @@ import subprocess as sp
 RevMapper = dict[ChrName, InternalChrIndex]
 
 
-class GaplessBT(NamedTuple):
+class PathsEnv(NamedTuple):
     auto: Path
     parY: Path
     genome: Path
@@ -74,20 +74,21 @@ def test_bed_format(strat_file: Path, reverse_map: RevMapper) -> str | None:
     return None
 
 
-def test_bed_not_in_gaps(strat_file: Path, gapless: GaplessBT) -> bool:
-    # ignore the actual gapless file for obvious reasons
+def test_bed_valid_regions(strat_file: Path, env: PathsEnv) -> bool:
+    # ignore the gaps stratification since this is out of the valid regions by
+    # definition
     if "gaps_slop15kb" in basename(strat_file):
         return True
     else:
         isXY = basename(dirname(strat_file)) == "XY"
-        gapless_path = gapless.parY if isXY else gapless.auto
+        valid_path = env.parY if isXY else env.auto
         # gunzip needed here because subtract bed will output gibberish if we
         # give it an empty gzip file
         p1, o = gunzip(strat_file)
-        p2, _ = subtractBed(o, gapless_path, gapless.genome)
+        p2, _ = subtractBed(o, valid_path, env.genome)
         out, err = p2.communicate()
         p1.wait()
-        with open(gapless.error_log, "a") as f:
+        with open(env.error_log, "a") as f:
             haserror = False
             if p1.returncode != 0:
                 f.write("gunzip error\n")
@@ -100,15 +101,11 @@ def test_bed_not_in_gaps(strat_file: Path, gapless: GaplessBT) -> bool:
         return len(out) == 0
 
 
-def test_bed(
-    strat_file: Path,
-    reverse_map: RevMapper,
-    gapless: GaplessBT,
-) -> list[str]:
+def test_bed(strat_file: Path, reverse_map: RevMapper, env: PathsEnv) -> list[str]:
     if (format_error := test_bed_format(strat_file, reverse_map)) is not None:
         return [format_error]
     else:
-        if test_bed_not_in_gaps(strat_file, gapless):
+        if test_bed_valid_regions(strat_file, env):
             return []
         else:
             return ["has gaps"]
@@ -153,11 +150,11 @@ def test_tsv_list(tsv_list: Path) -> list[str]:
 def run_all_tests(
     strat_file: Path,
     reverse_map: RevMapper,
-    gapless: GaplessBT,
+    env: PathsEnv,
 ) -> list[tuple[Path, str]]:
     return [
         (strat_file, msg)
-        for msg in test_bgzip(strat_file) + test_bed(strat_file, reverse_map, gapless)
+        for msg in test_bgzip(strat_file) + test_bed(strat_file, reverse_map, env)
     ]
 
 
@@ -168,23 +165,12 @@ def strat_files(path: Path) -> list[Path]:
 
 def main(smk: Any, sconf: cfg.GiabStrats) -> None:
     ws: dict[str, str] = smk.wildcards
-    fm = sconf.buildkey_to_ref_mappers(
-        cfg.wc_to_reffinalkey(ws),
-        cfg.wc_to_buildkey(ws),
-    )[1]
-    reverse_map = {v: k for k, v in fm.items()}
-
-    checksums_path = cfg.smk_to_input_name(smk, "checksums")
-    strat_list_path = cfg.smk_to_input_name(smk, "strat_list")
-    strats_path = cfg.smk_to_input_name(smk, "strats")
-    genome_path = cfg.smk_to_input_name(smk, "genome")
-    gapless_auto_path = cfg.smk_to_input_name(smk, "gapless_auto")
-    gapless_parY_path = cfg.smk_to_input_name(smk, "gapless_parY")
-
-    failed_tests_path = cfg.smk_to_log_name(smk, "failed")
-    error_path = cfg.smk_to_log_name(smk, "error")
 
     # check global stuff first (since this is faster)
+
+    strat_list_path = cfg.smk_to_input_name(smk, "strat_list")
+    checksums_path = cfg.smk_to_input_name(smk, "checksums")
+    failed_tests_path = cfg.smk_to_log_name(smk, "failed")
 
     global_failures = test_checksums(checksums_path) + test_tsv_list(strat_list_path)
 
@@ -197,17 +183,25 @@ def main(smk: Any, sconf: cfg.GiabStrats) -> None:
 
     # check individual stratification files
 
-    gapless = GaplessBT(
-        auto=gapless_auto_path,
-        parY=gapless_parY_path,
-        genome=genome_path,
-        error_log=error_path,
+    env = PathsEnv(
+        auto=cfg.smk_to_input_name(smk, "valid_auto"),
+        parY=cfg.smk_to_input_name(smk, "valid_parY"),
+        genome=cfg.smk_to_input_name(smk, "genome"),
+        error_log=cfg.smk_to_log_name(smk, "error"),
     )
+
+    strats_path = cfg.smk_to_input_name(smk, "strats")
+
+    fm = sconf.buildkey_to_ref_mappers(
+        cfg.wc_to_reffinalkey(ws),
+        cfg.wc_to_buildkey(ws),
+    )[1]
+    reverse_map = {v: k for k, v in fm.items()}
 
     strat_failures = [
         res
         for p in strat_files(strats_path)
-        for res in run_all_tests(p, reverse_map, gapless)
+        for res in run_all_tests(p, reverse_map, env)
     ]
 
     with open(failed_tests_path, "a") as f:

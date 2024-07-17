@@ -214,7 +214,7 @@ rule slop_uniform_repeats:
     input:
         bed=lambda w: lookup_perfect_uniform_repeat(w.unit_name, int(w.total_len)),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("SimpleRepeat_{unit_name}_ge{total_len}_slop5"),
     conda:
@@ -227,7 +227,7 @@ rule slop_uniform_repeats:
         slopBed -i {input.bed} -b 5 -g {input.genome} | \
         cut -f1-3 | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c \
         > {output}
         """
@@ -244,7 +244,7 @@ use rule slop_uniform_repeats as slop_uniform_repeat_ranges with:
             total_lenB=int(w.total_lenB) + 1,
         ),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("SimpleRepeat_{unit_name}_{total_lenA}to{total_lenB}_slop5"),
     wildcard_constraints:
@@ -261,7 +261,7 @@ use rule slop_uniform_repeats as slop_uniform_repeats_complement with:
             w.bases,
         ),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("SimpleRepeat_{unit_name}_ge{total_len}_{bases}_slop5"),
     wildcard_constraints:
@@ -281,7 +281,7 @@ use rule slop_uniform_repeats as slop_uniform_repeat_ranges_complement with:
             bases=w.bases,
         ),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("SimpleRepeat_{unit_name}_{total_lenA}to{total_lenB}_{bases}_slop5"),
     wildcard_constraints:
@@ -317,7 +317,7 @@ rule merge_imperfect_uniform_repeats:
             base=["A", "C", "G", "T"],
         ),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("SimpleRepeat_imperfecthomopolge{merged_len}_slop5"),
     conda:
@@ -329,7 +329,7 @@ rule merge_imperfect_uniform_repeats:
         multiIntersectBed -i {input.bed} | \
         slopBed -i stdin -b 5 -g {input.genome} | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
@@ -342,7 +342,7 @@ use rule merge_imperfect_uniform_repeats as merge_imperfect_uniform_repeats_comp
             base=list(w.bases),
         ),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("SimpleRepeat_imperfecthomopolge{merged_len}_{bases}_slop5"),
     wildcard_constraints:
@@ -602,7 +602,7 @@ rule merge_satellites:
     input:
         bed=rules.merge_satellites_intermediate.output,
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("satellites_slop5"),
     conda:
@@ -611,7 +611,7 @@ rule merge_satellites:
         """
         slopBed -i {input.bed} -b 5 -g {input.genome} | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
@@ -633,7 +633,7 @@ rule merge_all_uniform_repeats:
         imperfect=rules.all_uniform_repeats.input.imperfect_ge11,
         perfect=rules.all_perfect_uniform_repeats.input.R1_T7,
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("AllHomopolymers_ge7bp_imperfectge11bp_slop5"),
     conda:
@@ -644,7 +644,7 @@ rule merge_all_uniform_repeats:
         mergeBed -i stdin | \
         multiIntersectBed -i stdin {input.imperfect} | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c \
         > {output}
         """
@@ -694,7 +694,7 @@ rule filter_TRs:
         tr=rules.merge_repeats.output,
         hp=rules.merge_all_uniform_repeats.output,
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         lc.final("AllTandemRepeats_{tr_bound}bp_slop5"),
     params:
@@ -709,7 +709,7 @@ rule filter_TRs:
         """
         awk '({params.lower}+10)<=($3-$2) && ($3-$2)<({params.upper}+10)' {input.tr} | \
         subtractBed -a stdin -b {input.hp} -sorted | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 

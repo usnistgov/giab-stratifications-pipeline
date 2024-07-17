@@ -114,8 +114,8 @@ use rule generate_tsv_list as generate_bb_tsv_list with:
 rule unit_test_strats:
     input:
         strats=rules.list_all_strats.output[0],
-        gapless_auto=rules.get_gapless.output.auto,
-        gapless_parY=rules.get_gapless.output.parY,
+        valid_auto=rules.get_valid_regions.output.auto,
+        valid_parY=rules.get_valid_regions.output.parY,
         genome=rules.filter_sort_ref.output["genome"],
         strat_list=rules.generate_tsv_list.output[0],
         checksums=rules.generate_md5sums.output[0],
@@ -136,7 +136,7 @@ rule get_coverage_table:
     input:
         _test=rules.unit_test_strats.output,
         bedlist=rules.list_all_strats.output[0],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
         genome=rules.filter_sort_ref.output["genome"],
     # TODO don't hardcode in the future
     params:

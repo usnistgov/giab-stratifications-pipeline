@@ -5989,16 +5989,13 @@ class GiabStrats(BaseModel):
         return fmap_maybe(lambda x: x.other, self.get_comparison(rk, bk))
 
     def refkey_haplotypes(self, rk: RefKeyFullS) -> list[Haplotype]:
-        """Test if refkey is dip1 or dip2.
+        """Return haplotypes for refkey.
 
-        Return True if dip1, false if dip2.
+        If haploid, return nothing (haplotypes have no meaning).
 
-        If split is True, require dip1 refkey to have a haplotype and error
-        otherwise. The reverse is True if split is False.
+        If diploid1, return both haplotypes.
 
-        If nohap is True, throw error if refkey is hap. If False permit the hap
-        case and return False.
-
+        If diploid2, return the haplotype which corresponds to the refkey.
         """
         return self.with_ref_data_full(
             rk,

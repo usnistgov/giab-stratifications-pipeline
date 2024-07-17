@@ -36,7 +36,7 @@ use rule download_gaps as download_genome_features_bed with:
 rule write_PAR_final:
     input:
         bed=rules.write_PAR_intermediate.output,
-        gapless=rules.get_gapless.output.parY,
+        valid=rules.get_valid_regions.output.parY,
         genome=rules.filter_sort_ref.output["genome"],
     output:
         xy.final("chr{sex_chr}_PAR"),
@@ -44,7 +44,7 @@ rule write_PAR_final:
         "../envs/bedtools.yml"
     shell:
         """
-        intersectBed -a {input.bed} -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a {input.bed} -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
@@ -53,7 +53,7 @@ feature_inputs = {
     "bed": lambda w: expand_final_to_src(rules.download_genome_features_bed.output, w)[
         0
     ],
-    "gapless": rules.get_gapless.output.parY,
+    "valid": rules.get_valid_regions.output.parY,
     "genome": rules.filter_sort_ref.output["genome"],
 }
 
@@ -88,7 +88,7 @@ rule invert_PAR:
     input:
         bed=rules.write_PAR_final.output,
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.parY,
+        valid=rules.get_valid_regions.output.parY,
     output:
         xy.final("chr{sex_chr}_nonPAR"),
     conda:
@@ -97,14 +97,14 @@ rule invert_PAR:
         """
         complementBed -i {input.bed} -g {input.genome} | \
         grep {wildcards.sex_chr} | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
 
 rule filter_autosomes:
     input:
-        rules.get_gapless.output.auto,
+        rules.get_valid_regions.output.auto,
     output:
         xy.final("AllAutosomes"),
     conda:

@@ -22,7 +22,7 @@ def main(smk: Any, sconf: cfg.GiabStrats) -> None:
 
     inputs = cfg.smk_to_inputs_name(smk, "bed")
     genome = cfg.smk_to_input_name(smk, "genome")
-    gapless = cfg.smk_to_input_name(smk, "gapless")
+    valid = cfg.smk_to_input_name(smk, "valid")
     log = cfg.smk_to_log(smk)
     out_single = cfg.smk_to_output_name(smk, "single_lowmap")
     out_all = cfg.smk_to_output_name(smk, "all_lowmap")
@@ -51,7 +51,7 @@ def main(smk: Any, sconf: cfg.GiabStrats) -> None:
 
     def merge_bed(bed: IO[bytes], out: Path) -> tuple[sp.Popen[bytes], sp.Popen[bytes]]:
         p1, o1 = mergeBed(bed, ["-d", "100"])
-        p2, o2 = intersectBed(o1, gapless, genome)
+        p2, o2 = intersectBed(o1, valid, genome)
         bgzip_file(o2, out)
         return p1, p2
 
