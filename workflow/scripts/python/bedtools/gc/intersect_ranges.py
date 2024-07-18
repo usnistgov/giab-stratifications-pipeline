@@ -50,14 +50,14 @@ def write_middle_range_bed(
     lower: GCInput,
     upper: GCInput,
     genome: Path,
-    gapless: Path,
+    valid_regions: Path,
     log: Path,
 ) -> str:
     out = final_path(f"gc{lower.fraction}to{upper.fraction}_slop50")
     with open(upper.bed, "rb") as i:
         p1, o0 = complementBed(i, genome)
         p2, o1 = subtractBed(o0, lower.bed, genome)
-        p3, o2 = intersectBed(o1, gapless, genome)
+        p3, o2 = intersectBed(o1, valid_regions, genome)
         bgzip_file(o2, out)
         check_processes([p1, p2, p3], log)
     return str(out)
@@ -94,7 +94,7 @@ def main(smk: Any, sconf: cfg.GiabStrats) -> None:
     low_paths = cfg.smk_to_inputs_name(smk, "low")
     high_paths = cfg.smk_to_inputs_name(smk, "high")
     genome_path = cfg.smk_to_input_name(smk, "genome")
-    gapless_path = cfg.smk_to_input_name(smk, "gapless")
+    valid_path = cfg.smk_to_input_name(smk, "valid")
     log_path = cfg.smk_to_log(smk)
     out_widest = cfg.smk_to_output_name(smk, "widest_extreme")
     out_all = cfg.smk_to_output_name(smk, "all_gc")
@@ -108,22 +108,32 @@ def main(smk: Any, sconf: cfg.GiabStrats) -> None:
     # ASSUME both of these input lists are sorted by GC fraction
     low = [GCInput(p, f, r) for p, (f, r) in zip(low_paths, gps.low)]
     high = [GCInput(p, f, r) for p, (f, r) in zip(high_paths, gps.high)]
-    genome = Path(genome_path)
-    gapless = Path(gapless_path)
 
     def final_path(name: str) -> Path:
         p = Path(path_pattern.format(name))
         p.parent.mkdir(exist_ok=True, parents=True)
         return p
 
-    low_strats = write_simple_range_beds(final_path, low, genome, True, log_path)
-    high_strats = write_simple_range_beds(final_path, high, genome, False, log_path)
+    low_strats = write_simple_range_beds(
+        final_path,
+        low,
+        genome_path,
+        True,
+        log_path,
+    )
+    high_strats = write_simple_range_beds(
+        final_path,
+        high,
+        genome_path,
+        False,
+        log_path,
+    )
     range_strat = write_middle_range_bed(
         final_path,
         low[-1],
         high[0],
-        genome,
-        gapless,
+        genome_path,
+        valid_path,
         log_path,
     )
     widest_extreme, other_extremes = write_intersected_range_beds(

@@ -2902,7 +2902,7 @@ class Tools(BaseModel):
     """Urls for tools to download/build/use in the pipeline."""
 
     kent: HttpUrl = "https://github.com/ucscGenomeBrowser/kent/archive/refs/tags/v462_base.tar.gz"  # type: ignore
-    repseq: HttpUrl = "https://github.com/ndwarshuis/repseq/archive/refs/tags/v1.1.0.tar.gz"  # type: ignore
+    repseq: HttpUrl = "https://github.com/usnistgov/giab-repseq/archive/refs/tags/v1.1.0.tar.gz"  # type: ignore
     paftools: HttpUrl = "https://raw.githubusercontent.com/lh3/minimap2/e28a55be86b298708a2a67c924d665a00b8d829c/misc/paftools.js"  # type: ignore
     dipcall_aux: HttpUrl = "https://raw.githubusercontent.com/lh3/dipcall/6bd5d7724699491f215aeb5fb628490ebf2cc3ae/dipcall-aux.js"  # type: ignore
     gemlib: HttpUrl = "https://sourceforge.net/projects/gemlibrary/files/gem-library/Binary%20pre-release%203/GEM-binaries-Linux-x86_64-core_i3-20130406-045632.tbz2/download"  # type: ignore
@@ -3649,6 +3649,10 @@ class BuildData_(Generic[RefSrcT, BedSrcT, VcfSrcT, BedCoordsT, BuildCompareT]):
         return self.build.bigbed
 
     @property
+    def want_diploid(self) -> bool:
+        return len(self.build.include.hets) > 0
+
+    @property
     def want_low_complexity(self) -> bool:
         return self.build.include.low_complexity
 
@@ -3794,9 +3798,9 @@ AnyStrat = HapStrat | Dip1Strat | Dip2Strat
 
 
 class Documentation(BaseModel):
-    pipeline_repo: HttpUrl = "https://github.com/ndwarshuis/giab-strats-smk"  # type: ignore
+    pipeline_repo: HttpUrl = "https://github.com/usnistgov/giab-stratifications-pipeline"  # type: ignore
     config_repo: HttpUrl = (
-        "https://github.com/ndwarshuis/giab-stratifications"  # type: ignore
+        "https://github.com/usnistgov/giab-stratifications"  # type: ignore
     )
 
 
@@ -5985,16 +5989,13 @@ class GiabStrats(BaseModel):
         return fmap_maybe(lambda x: x.other, self.get_comparison(rk, bk))
 
     def refkey_haplotypes(self, rk: RefKeyFullS) -> list[Haplotype]:
-        """Test if refkey is dip1 or dip2.
+        """Return haplotypes for refkey.
 
-        Return True if dip1, false if dip2.
+        If haploid, return nothing (haplotypes have no meaning).
 
-        If split is True, require dip1 refkey to have a haplotype and error
-        otherwise. The reverse is True if split is False.
+        If diploid1, return both haplotypes.
 
-        If nohap is True, throw error if refkey is hap. If False permit the hap
-        case and return False.
-
+        If diploid2, return the haplotype which corresponds to the refkey.
         """
         return self.with_ref_data_full(
             rk,

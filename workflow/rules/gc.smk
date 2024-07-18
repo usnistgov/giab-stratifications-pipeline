@@ -36,7 +36,7 @@ rule find_gc_content:
     input:
         ref=rules.filter_sort_ref.output["fa"],
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         gc.inter.postsort.data / "gc{frac}.bed.gz",
     params:
@@ -51,7 +51,7 @@ rule find_gc_content:
         cut -f1-3 | \
         slopBed -i stdin -g {input.genome} -b 50 | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c \
         > {output}
         """
@@ -88,7 +88,7 @@ checkpoint intersect_gc_ranges:
     input:
         unpack(range_inputs),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     # 'widest' is a symlink to the widest extreme gc range bed which should
     # always be present if this rule is run. This minor complexifier allows
     # other rules to refer to this particular file without invoking the

@@ -14,25 +14,11 @@ This reference is diploid. The files here contain regions for both
 Each subdirectory contains different stratifications grouped by type. These are
 summarized below.
 
-{% if have_low_complexity -%}
-## Low Complexity
+{% if have_diploid -%}
+## Diploid
 
-Regions with different types and sizes of low complexity sequence, e.g.,
-homopolymers, STRs, VNTRs and other locally repetitive sequences.
-
-{% endif -%}
-{% if have_segdups -%}
-## Segmental Duplications
-
-Regions with segmental duplications (generally defined as repeated regions >1kb
-with >90% similarity).
-
-{% endif -%}
-{% if have_sex -%}
-## XY
-
-Chromosome XY specific regions such as pseudoautosomal regions (PAR), XTR or
-ampliconic.
+Regions which generally describe relationships between the two haplotypes of a
+diploid genome (for example, heterozygous regions)
 
 {% endif -%}
 {% if have_functional -%}
@@ -45,6 +31,13 @@ Regions to stratify variants inside and outside coding regions.
 ## GCcontent
 
 Regions with different ranges (%) of GC content.
+
+{% endif -%}
+{% if have_low_complexity -%}
+## Low Complexity
+
+Regions with different types and sizes of low complexity sequence, e.g.,
+homopolymers, STRs, VNTRs and other locally repetitive sequences.
 
 {% endif -%}
 {% if have_mappability -%}
@@ -70,6 +63,13 @@ This category contains stratifications for miscellaneously difficult regions of
 the genome, which are described in the accompanying README.
 {%- endif %}
 {%- endif %}
+{% if have_segdups -%}
+## Segmental Duplications
+
+Regions with segmental duplications (generally defined as repeated regions >1kb
+with >90% similarity).
+
+{% endif -%}
 {% if have_telomeres -%}
 ## Telomeres
 
@@ -82,6 +82,13 @@ Telomeric regions.
 Regions with different general types of difficult regions or any type of
 difficult region or complex variant. For example, performance can be measured in
 just "easy" or "all difficult" regions of the genome.
+
+{% endif -%}
+{% if have_sex -%}
+## XY
+
+Chromosome XY specific regions such as pseudoautosomal regions (PAR), XTR or
+ampliconic.
 
 {% endif -%}
 {% for other in other_levels -%}

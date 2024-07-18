@@ -4,7 +4,7 @@ This repository contains the snakemake pipeline for generating the
 Genome-in-a-Bottle stratifications. This pipeline is designed to be reference
 agnostic. For the complete stratifications generated for existing references
 such as CHM13 or GRCh38, see
-[here](https://github.com/ndwarshuis/giab-stratifications).
+[here](https://github.com/usnistgov/giab-stratifications).
 
 Note that this pipeline only applies to stratifications starting with version
 v3.2. For older versions, please see

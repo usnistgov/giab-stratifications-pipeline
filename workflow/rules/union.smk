@@ -42,7 +42,7 @@ rule intersect_segdup_and_map:
 
 use rule _invert_autosomal_regions as invert_segdup_and_map with:
     input:
-        rules.intersect_segdup_and_map.output,
+        **invert_region_inputs(rules.intersect_segdup_and_map.output),
     output:
         uni.final("notinalllowmapandsegdupregions"),
 
@@ -57,7 +57,7 @@ use rule intersect_segdup_and_map as intersect_alldifficult with:
 
 use rule invert_segdup_and_map as invert_alldifficult with:
     input:
-        bed=rules.intersect_alldifficult.output,
+        **invert_region_inputs(rules.intersect_alldifficult.output),
     output:
         uni.final("notinalldifficultregions"),
 

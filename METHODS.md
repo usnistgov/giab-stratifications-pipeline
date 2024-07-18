@@ -79,7 +79,7 @@ These come in two subflavors: perfect and imperfect.
 A "perfect uniform repeat" is defined as a repeating pattern of either 1, 2, 3,
 or 4bp motifs (denoted lexically as "homopolymer", "di", "tri", and "quad"
 repeats) that are less than or equal to a given length. These are generated
-using a [C program](https://github.com/ndwarshuis/repseq) which scans the
+using a [C program](https://github.com/usnistgov/giab-repseq) which scans the
 reference for such repeats, producing a bed file annotated with the motif in the
 4th column.
 
