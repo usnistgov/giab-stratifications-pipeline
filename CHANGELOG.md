@@ -1,3 +1,9 @@
+# 6.0.2
+
+- remove "input files" from params directives, fixes lots of weird race bugs
+- mask Y PAR for all haploid references (and not for diploid)
+- fix minor documentation bugs
+
 # 6.0.1
 
 - move repositories to new location (update docs and submodules)
