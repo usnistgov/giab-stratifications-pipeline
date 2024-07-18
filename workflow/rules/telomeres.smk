@@ -16,7 +16,7 @@ rule find_telomeres:
     input:
         ref=rules.filter_sort_ref.output["fa"],
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         telo.final("telomeres"),
     conda:
@@ -27,7 +27,7 @@ rule find_telomeres:
         """
         seqtk telo {input.ref} 2> {log} | \
         cut -f1-3 | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c \
         > {output}
         """

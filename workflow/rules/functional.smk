@@ -81,7 +81,7 @@ def all_misc(other_level_key, ref_final_key, build_key):
 
 rule get_gaps:
     input:
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
         genome=rules.filter_sort_ref.output["genome"],
     output:
         odiff.final("gaps_slop15kb"),
@@ -89,10 +89,10 @@ rule get_gaps:
         "../envs/bedtools.yml"
     shell:
         """
-        complementBed -i {input.gapless} -g {input.genome} | \
+        complementBed -i {input.valid} -g {input.genome} | \
         slopBed -i stdin -b 15000 -g {input.genome} | \
         mergeBed -i stdin | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
@@ -177,7 +177,7 @@ rule merge_cds:
     input:
         bed=lambda w: read_named_checkpoint("normalize_cds", "cds", w),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         func.final("refseq_cds"),
     conda:
@@ -185,14 +185,14 @@ rule merge_cds:
     shell:
         """
         mergeBed -i {input.bed} | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
 
 use rule _invert_autosomal_regions as invert_cds with:
     input:
-        rules.merge_cds.output,
+        **invert_region_inputs(rules.merge_cds.output),
     output:
         func.final("notinrefseq_cds"),
 
@@ -201,7 +201,7 @@ rule remove_vdj_gaps:
     input:
         bed=lambda w: read_named_checkpoint("normalize_cds", "vdj", w),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         odiff.final("VDJ"),
     conda:
@@ -209,7 +209,7 @@ rule remove_vdj_gaps:
     shell:
         """
         mergeBed -i {input.bed} | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
@@ -218,7 +218,7 @@ use rule remove_vdj_gaps as remove_mhc_gaps with:
     input:
         bed=lambda w: read_named_checkpoint("normalize_cds", "mhc", w),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         odiff.final("MHC"),
 
@@ -227,7 +227,7 @@ use rule remove_vdj_gaps as remove_kir_gaps with:
     input:
         bed=lambda w: read_named_checkpoint("normalize_cds", "kir", w),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         odiff.final("KIR"),
 
@@ -310,7 +310,7 @@ rule remove_gaps_other:
             ["other_level_key", "other_strat_key"],
         ),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         config.build_final_strat_path("{other_level_key}", "{other_strat_key}"),
     conda:
@@ -319,7 +319,7 @@ rule remove_gaps_other:
         **other_constraints,
     shell:
         """
-        intersectBed -a {input.bed} -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a {input.bed} -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 

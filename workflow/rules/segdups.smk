@@ -60,7 +60,7 @@ rule merge_superdups:
     input:
         bed=lambda w: read_checkpoint("normalize_superdups", w),
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.auto,
+        valid=rules.get_valid_regions.output.auto,
     output:
         segdup.final("segdups"),
     conda:
@@ -68,7 +68,7 @@ rule merge_superdups:
     shell:
         """
         mergeBed -i {input.bed} -d 100 | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
@@ -90,14 +90,14 @@ rule filter_long_superdups:
 
 use rule _invert_autosomal_regions as notin_superdups with:
     input:
-        rules.merge_superdups.output,
+        **invert_region_inputs(rules.merge_superdups.output),
     output:
         segdup.final("notinsegdups"),
 
 
 use rule notin_superdups as notin_long_superdups with:
     input:
-        rules.filter_long_superdups.output,
+        **invert_region_inputs(rules.filter_long_superdups.output),
     output:
         segdup.final("notinsegdups_gt10kb"),
 

@@ -89,7 +89,7 @@ def bedpath_to_strat_names(bp: Path) -> tuple[str, str]:
 
 def main(smk: Any, sconf: cfg.GiabStrats) -> None:
     ws: dict[str, str] = smk.wildcards
-    gapless_path = cfg.smk_to_input_name(smk, "gapless")
+    valid_path = cfg.smk_to_input_name(smk, "valid")
     genome_path = cfg.smk_to_input_name(smk, "genome")
     bedlist = cfg.smk_to_input_name(smk, "bedlist")
     full_out = cfg.smk_to_output_name(smk, "full")
@@ -104,7 +104,7 @@ def main(smk: Any, sconf: cfg.GiabStrats) -> None:
     bk = cfg.wc_to_buildkey(ws)
 
     chr_hap_mapper = get_chr_paired_mapper(sconf, rk, bk)
-    gapless_sum = sum_bed_file(gapless_path)
+    valid_sum = sum_bed_file(valid_path)
     genome = read_genome(genome_path)
 
     with open(bedlist, "r") as i, gzip.open(full_out, "w") as of, gzip.open(
@@ -118,7 +118,7 @@ def main(smk: Any, sconf: cfg.GiabStrats) -> None:
             # we need to do this
             for chrom, bedtotal in sum_bed_file(bp).items():
                 shortChromName, hap, idx = chr_hap_mapper[chrom]
-                fraction = bedtotal / gapless_sum[chrom]
+                fraction = bedtotal / valid_sum[chrom]
                 fullkey = f"{rk}@{bk}-{hap.value + 1}"
                 newline = "\t".join(
                     [

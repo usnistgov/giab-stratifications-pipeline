@@ -123,7 +123,7 @@ rule download_gaps:
         "../scripts/python/bedtools/misc/get_bedlike.py"
 
 
-def gapless_input(wildcards):
+def valid_input(wildcards):
     rk = wildcards.ref_final_key
     bk = wildcards.build_key
 
@@ -159,19 +159,19 @@ def gapless_input(wildcards):
     }
 
 
-rule get_gapless:
+rule get_valid_regions:
     input:
-        unpack(gapless_input),
+        unpack(valid_input),
         genome=rules.filter_sort_ref.output["genome"],
     output:
-        auto=ref.inter.build.data / "genome_gapless.bed.gz",
-        parY=ref.inter.build.data / "genome_gapless_parY.bed.gz",
+        auto=ref.inter.build.data / "valid_regions_auto.bed.gz",
+        parY=ref.inter.build.data / "valid_regions_parY.bed.gz",
     log:
-        ref.inter.build.log / "get_gapless.txt",
+        ref.inter.build.log / "valid_regions.txt",
     conda:
         "../envs/bedtools.yml"
     script:
-        "../scripts/python/bedtools/ref/get_gapless.py"
+        "../scripts/python/bedtools/ref/get_valid_regions.py"
 
 
 # benchmark
@@ -252,17 +252,20 @@ rule write_PAR_intermediate:
 # skeleton rules (meant to be overridden elsewhere)
 
 
+def invert_region_inputs(bed_path):
+    return {
+        "bed": bed_path,
+        "genome": rules.filter_sort_ref.output["genome"],
+        "valid": rules.get_valid_regions.output.auto,
+    }
+
+
 rule _invert_autosomal_regions:
-    # this is a nice trick to avoid specifying input files for rule overrides
-    # when they never change
-    params:
-        gapless=rules.get_gapless.output.auto,
-        genome=rules.filter_sort_ref.output["genome"],
     conda:
         "../envs/bedtools.yml"
     shell:
         """
-        complementBed -i {input} -g {params.genome} | \
-        intersectBed -a stdin -b {params.gapless} -sorted -g {params.genome} | \
+        complementBed -i {input.bed} -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """

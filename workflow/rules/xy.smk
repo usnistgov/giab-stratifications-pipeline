@@ -36,7 +36,7 @@ use rule download_gaps as download_genome_features_bed with:
 rule write_PAR_final:
     input:
         bed=rules.write_PAR_intermediate.output,
-        gapless=rules.get_gapless.output.parY,
+        valid=rules.get_valid_regions.output.parY,
         genome=rules.filter_sort_ref.output["genome"],
     output:
         xy.final("chr{sex_chr}_PAR"),
@@ -44,44 +44,51 @@ rule write_PAR_final:
         "../envs/bedtools.yml"
     shell:
         """
-        intersectBed -a {input.bed} -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a {input.bed} -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
 
+feature_inputs = {
+    "bed": lambda w: expand_final_to_src(rules.download_genome_features_bed.output, w)[
+        0
+    ],
+    "valid": rules.get_valid_regions.output.parY,
+    "genome": rules.filter_sort_ref.output["genome"],
+}
+
+
 rule filter_XTR_features:
     input:
-        bed=lambda w: expand_final_to_src(
-            rules.download_genome_features_bed.output, w
-        )[0],
-        gapless=rules.get_gapless.output.parY,
-        genome=rules.filter_sort_ref.output["genome"],
+        **feature_inputs,
     output:
         xy.final("chr{sex_chr}_XTR"),
     log:
         xy.inter.postsort.log / "{sex_chr}_filter_XTR_features.txt",
     conda:
         "../envs/bedtools.yml"
-    params:
-        level="XTR",
     script:
-        "../scripts/python/bedtools/xy/filter_sort_features.py"
+        "../scripts/python/bedtools/xy/filter_sort_xtr.py"
 
 
-use rule filter_XTR_features as filter_ampliconic_features with:
+rule filter_ampliconic_features:
+    input:
+        **feature_inputs,
     output:
         xy.final("chr{sex_chr}_ampliconic"),
     log:
         xy.inter.postsort.log / "{sex_chr}_filter_ampliconic_features.txt",
-    params:
-        level="Ampliconic",
+    conda:
+        "../envs/bedtools.yml"
+    script:
+        "../scripts/python/bedtools/xy/filter_sort_ampliconic.py"
 
 
 rule invert_PAR:
     input:
         bed=rules.write_PAR_final.output,
         genome=rules.filter_sort_ref.output["genome"],
-        gapless=rules.get_gapless.output.parY,
+        valid=rules.get_valid_regions.output.parY,
     output:
         xy.final("chr{sex_chr}_nonPAR"),
     conda:
@@ -90,14 +97,14 @@ rule invert_PAR:
         """
         complementBed -i {input.bed} -g {input.genome} | \
         grep {wildcards.sex_chr} | \
-        intersectBed -a stdin -b {input.gapless} -sorted -g {input.genome} | \
+        intersectBed -a stdin -b {input.valid} -sorted -g {input.genome} | \
         bgzip -c > {output}
         """
 
 
 rule filter_autosomes:
     input:
-        rules.get_gapless.output.auto,
+        rules.get_valid_regions.output.auto,
     output:
         xy.final("AllAutosomes"),
     conda:
