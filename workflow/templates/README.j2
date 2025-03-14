@@ -1,0 +1,244 @@
+# GIAB {{ version }} Stratifications
+
+The stratification files were developed with the Global Alliance for Genomic
+Health (GA4GH) Benchmarking Team, the [Genome in a Bottle Consortium
+(GIAB)](https://www.nist.gov/programs-projects/genome-bottle), and the
+[Telomere-to-Telomere Consortium
+(T2T)](https://sites.google.com/ucsc.edu/t2tworkinggroup). They are intended as
+a standard resource of BED and bigBED files for use in stratifying true
+positive, false positive, and false negative variant calls in challenging and
+targeted regions of the genome.
+
+The stratification BED files are accessible on the [GIAB FTP
+site](https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/genome-stratifications/).
+These files can be used as a standard resource of BED files for use with GA4GH
+benchmark tools such as [hap.py](https://github.com/Illumina/hap.py).
+
+Equivalent stratification sets are provided for different reference versions and
+assemblies, including GRCh37, GRCh38, CHM13, and both HG002 haplotypes.
+
+## Author Information
+
+- Principal Investigator: Justin Zook, NIST, <jzook@nist.gov>
+- Nathan D Olson, NIST, <nathanael.olson@nist.gov>
+- Justin Wagner, NIST, <justin.wagner@nist.gov>
+- Jennifer McDaniel, NIST, <jennifer.mcdaniel@nist.gov>
+- Nate Dwarshuis, NIST, <nathan.dwarshuis@nist.gov>
+
+## Stratification Version History
+
+See [GIAB stratification
+changelog](https://github.com/usnistgov/giab-stratifications/blob/master/CHANGELOG.md)
+for detailed information on changes to stratifications.
+
+See [giab-stratification-pipeline
+changelog](https://github.com/usnistgov/giab-stratifications-pipeline/blob/master/CHANGELOG.md)
+for detailed information on changes to the stratification pipeline.
+
+See [CHANGELOG](https://github.com/genome-in-a-bottle/genome-stratifications/CHANGELOG)
+for v1.0 - v3.1 version changes.
+
+## Stratification Types
+
+Stratifications can be binned into types: Diploid, Functional, GC Content,
+Low Complexity, Mappability, Other Difficult, Segmental Duplications, Union, XY,
+Ancestry, Functional Technically Difficult, and Genome Specific.
+General information for stratification types are provided below.
+Associated stratification READMEs provide more information on what the genomic
+intervals represent.
+
+### Diploid
+
+Regions which generally describe relationships between the two haplotypes of a
+diploid genome (for example, heterozygous regions)
+
+### Functional
+
+Regions to stratify variants inside and outside coding regions.
+
+### GCcontent
+
+Regions with different ranges (%) of GC content.
+
+### Low Complexity
+
+Regions with different types and sizes of low complexity sequence, e.g.,
+homopolymers, STRs, VNTRs and other locally repetitive sequences.
+
+### Mappability
+
+Regions where short read mapping can be challenging.
+
+### Other Difficult
+
+This category contains stratifications for miscellaneously difficult regions of
+the genome, including:
+
+- gaps in the reference (if applicable)
+- the killer-cell immunoglobulin-like receptor (KIR) region (highly polymorphic)
+- the major histocompatibility complex (MHC) region (highly polymorphic)
+- the VDJ loci (highly polymorphic with somatic rearrangements)
+- and more, which are described in the accompanying README
+
+### Segmental Duplications
+
+Regions with segmental duplications (generally defined as repeated regions >1kb
+with >90% similarity).
+
+### Union
+
+Regions with different general types of difficult regions or any type of
+difficult region or complex variant. For example, performance can be measured in
+just "easy" or "all difficult" regions of the genome.
+
+### XY
+
+Chromosome XY specific regions such as pseudoautosomal regions (PAR), XTR or
+ampliconic.
+
+### Ancestry
+
+Regions with inferred patterns of local ancestry. See the accompanying README
+for further details.
+
+### FunctionalTechnicallyDifficult
+
+Functional regions that are also likely technically difficult to sequence. See
+the accompanying README for further details.
+
+### GenomeSpecific
+
+Difficult regions due to presence of challenging variants in a NIST/GIAB sample,
+including 1) regions containing putative compound heterozygous variants 2) small
+regions containing multiple phased variants, 3) regions with potential
+structural or copy number variation. See the accompanying README for further
+details.
+
+## Sharing/Access Information
+
+Licenses/restrictions placed on the data, or limitations of reuse:
+Publicly released data are freely available for reuse without embargo.
+
+To reference stratification sets, please cite:
+
+    Dwarshuis, N., Kalra, D., McDaniel, J., et al.
+    The GIAB genomic stratifications resource for human reference genomes.
+    bioRxiv 2023.10.27.563846; doi: https://doi.org/10.1101/2023.10.27.563846
+
+Citations relevant to specific stratifications or groups of stratifications are 
+located in the associated READMEs.
+
+If stratifications were used in benchmarking with GA4GH/GIAB best practices or
+hap.py please reference:
+
+    Krusche, P., Trigg, L., Boutros, P.C. et al.
+    Best practices for benchmarking germline small-variant calls in human genomes.
+    Nat Biotechnol 37, 555-560 (2019). https://doi.org/10.1038/s41587-019-0054-x
+
+### Links to publicly accessible locations of the data
+
+[GIAB FTP URL](https://ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/genome-stratifications/)
+
+The snakemake pipeline itself is stored in git
+[here](https://github.com/usnistgov/giab-stratifications-pipeline).
+
+The configuration that uses this pipeline, which in turn generated this
+stratification set, is [here](https://github.com/usnistgov/giab-stratifications)
+
+## DATA & FILE OVERVIEW
+
+### File Types and Descriptions
+
+- **`{reference}@all/`**: Subdirectories contain all stratifications (bigBed and
+  bed.gz) and associated READMEs grouped by stratification type for a given
+  reference. A file with md5 checksums,
+  **`{version}-stratifications-{reference}-md5s.txt`**, is also provided. These
+  directories also contain .tsv files with a list of stratification ids and
+  paths to stratifications relative to the reference directory for use when
+  benchmarking with hap.py.
+
+- **`genome-stratifications-{reference}@all.tar.gz`**, described above are also
+provided as an alternative download option for retrieving all files by
+reference.
+
+- **`validation`**: stratification validation results comparing coverage and
+benchmarking results across reference genomes.
+
+- stratifications provided as bgzip compressed bed and bigBed files.
+- file format specification
+  - [bed](https://github.com/samtools/hts-specs/blob/ebebbc8c2910ef2d4c5e7119c6f9ffac3bb6a0cb/BEDv1.pdf)
+  - [bigBed](https://genome.ucsc.edu/goldenPath/help/bigBed.html)
+
+### Usage
+
+The typical use-case for these stratifications is via a benchmarking tool such
+as [hap.py](https://github.com/Illumina/hap.py/tree/master). Benchmarking
+involves comparing a query VCF file to a benchmark VCF file in the benchmark
+regions (BED file), for the same genome against the same reference. Each variant
+in this comparison is labeled as a true positive (in both benchmark and query),
+false positive (only in query), or false negative (only in benchmark). These
+labels can be further summarized using classification metrics such as precision
+and recall. The stratifications provided here allow these metrics to be subset
+to certain regions of interest to help understand genomic contexts associated
+with higher or lower accuracy.
+
+Here is an example which will produce stratified benchmarking results for a
+query VCF callset to a benchmark callset (restricted to regions for which the
+benchmark is confident):
+
+```bash
+hap.py path/to/benchmark.vcf path/to/query.vcf \
+  -f path/to/benchmark_regions.vcf \
+  -o <output_prefix> \
+  --stratification {reference}-all-stratifications.tsv \
+  --reference path/to/reference.fa
+```
+
+For each region in tsv specified by the `--stratification` flag, `hap.py` will
+subset to only the variants in this region before calculating performance
+metrics.
+
+These tsv files are located in the individual reference genome stratification
+directories. The provided tarballs also have this tsv in the root, so one only
+needs to download and extract the tarball to have access to the stratifications
+to run this command.
+
+## Data-Use Policy
+
+This data/work was created by employees of the National Institute of Standards
+and Technology (NIST), an agency of the Federal Government. Pursuant to title 17
+United States Code Section 105, works of NIST employees are not subject to
+copyright protection in the United States. This data/work may be subject to
+foreign copyright.
+
+The data/work is provided by NIST as a public service and is expressly provided
+AS IS. NIST MAKES NO WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR STATUTORY,
+INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT AND DATA ACCURACY. NIST does not
+warrant or make any representations regarding the use of the data or the results
+thereof, including but not limited to the correctness, accuracy, reliability or
+usefulness of the data. NIST SHALL NOT BE LIABLE AND YOU HEREBY RELEASE NIST
+FROM LIABILITY FOR ANY INDIRECT, CONSEQUENTIAL, SPECIAL, OR INCIDENTAL DAMAGES
+(INCLUDING DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF
+BUSINESS INFORMATION, AND THE LIKE), WHETHER ARISING IN TORT, CONTRACT, OR
+OTHERWISE, ARISING FROM OR RELATING TO THE DATA (OR THE USE OF OR INABILITY TO
+USE THIS DATA), EVEN IF NIST HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES.
+
+To the extent that NIST may hold copyright in countries other than the United
+States, you are hereby granted the non-exclusive irrevocable and unconditional
+right to print, publish, prepare derivative works and distribute the NIST data,
+in any medium, or authorize others to do so on your behalf, on a royalty-free
+basis throughout the world.
+
+You may improve, modify, and create derivative works of the data or any portion
+of the data, and you may copy and distribute such modifications or works.
+Modified works should carry a notice stating that you changed the data and
+should note the date and nature of any such change. Please explicitly
+acknowledge the National Institute of Standards and Technology as the source of
+the data: Data citation recommendations are provided at
+<https://www.nist.gov/open/license>.
+
+Permission to use this data is contingent upon your acceptance of the terms of
+this agreement and upon your providing appropriate acknowledgments of NIST's
+creation of the data/work.

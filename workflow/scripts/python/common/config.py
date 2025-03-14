@@ -3820,6 +3820,7 @@ FUNCTIONAL_TECH_DESC = (
 class GiabStrats(BaseModel):
     """Top level stratification object."""
 
+    version: str
     other_levels: list[OtherLevelDescription] = [
         OtherLevelDescription(
             key=OtherLevelKey("Ancestry"),

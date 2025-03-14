@@ -2,6 +2,7 @@
 #
 # the following is a typical large-scale config (in this case which should
 # closely match a subset of the v3.1 strats for GRCh38)
+version: 4.20
 
 haploid_stratifications:
   GRCh38-full:
