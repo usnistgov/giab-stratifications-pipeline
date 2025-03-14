@@ -14,7 +14,10 @@
 # 'GiabStrats' class in workflow/scripts/python/common/config.py. To make things
 # easier, the most important information is documented here.
 #
-# The top level defines each of the stratfications, in this case named 'GRCh38',
+# define the version here:
+version: 4.20
+
+# This defines each of the stratfications, in this case named 'GRCh38',
 # 'GRCh37', etc.
 haploid_stratifications:
   GRCh38:
@@ -460,7 +463,7 @@ haploid_stratifications:
           bed:
             hap:
               url: https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405.25_GRCh37.p13/GCF_000001405.25_GRCh37.p13_genomic.gff.gz
-              md5: 2832fbf82812309349a82ebc681d1fdb
+              md5: 4f5c1eccaf85f44882e67f1cf2a76788
             chr_pattern:
               special:
                 1: NC_000001.10
@@ -578,7 +581,7 @@ haploid_stratifications:
           bed:
             hap:
               url: https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_genomic.gff.gz
-              md5: ef95051dbf2005a6269dd21399fe08db
+              md5: 55482d4eeaefe18581a6ff5899f47695
             chr_pattern:
               special:
                 1: NC_060925.1
