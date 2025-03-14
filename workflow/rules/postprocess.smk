@@ -411,8 +411,21 @@ rule generate_bb_tarballs:
         """
 
 
+rule format_global_README:
+    input:
+        readme="workflow/templates/README.j2",
+    output:
+        config.final_root_dir / "README.md",
+    conda:
+        "../envs/templates.yml"
+    localrule: True
+    script:
+        "../scripts/python/templates/format_readme/format_global.py"
+
+
 rule checksum_everything:
     input:
+        rules.format_global_README.output,
         rules.copy_validation_README.output,
         rules.make_coverage_plots.output,
         rules.summarize_happy.output,

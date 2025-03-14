@@ -14,7 +14,10 @@
 # 'GiabStrats' class in workflow/scripts/python/common/config.py. To make things
 # easier, the most important information is documented here.
 #
-# The top level defines each of the stratfications, in this case named 'GRCh38',
+# define the version here:
+version: 4.20
+
+# This defines each of the stratfications, in this case named 'GRCh38',
 # 'GRCh37', etc.
 haploid_stratifications:
   GRCh38:
