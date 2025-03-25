@@ -1,3 +1,12 @@
+# 6.1.1
+
+- allow ftp urls
+
+# 6.1.0
+
+- add version to configuration
+- add global readme
+
 # 6.0.2
 
 - remove "input files" from params directives, fixes lots of weird race bugs

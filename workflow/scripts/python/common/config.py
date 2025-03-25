@@ -106,7 +106,7 @@ from pathlib import Path
 from pydantic import BaseModel as BaseModel_
 from pydantic.generics import GenericModel as GenericModel_
 from pydantic.generics import GenericModelT
-from pydantic import validator, HttpUrl, FilePath, NonNegativeInt, Field
+from pydantic import validator, HttpUrl, AnyUrl, FilePath, NonNegativeInt, Field
 from dataclasses import dataclass
 from enum import unique, Enum
 from typing import (
@@ -2870,7 +2870,7 @@ class RefFileSrc(FileSrc_):
 class HttpSrc_(HashedSrc_):
     """Source for a remote file to be downloaded via HTTP"""
 
-    url: HttpUrl
+    url: AnyUrl
     comment: str | None = None
 
     @property
